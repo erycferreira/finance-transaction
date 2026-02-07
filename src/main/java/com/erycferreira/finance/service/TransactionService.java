@@ -2,6 +2,7 @@ package com.erycferreira.finance.service;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -13,7 +14,7 @@ import com.erycferreira.finance.exception.DateTimeOutLimitException;
 @Service
 public class TransactionService {
 
-    private final List<Transaction> transactions = new ArrayList<>();
+    private final List<Transaction> transactions = Collections.synchronizedList(new ArrayList<>());
 
     public void createTransaction(TransactionRequest request) {
         OffsetDateTime current = OffsetDateTime.now();
@@ -23,5 +24,9 @@ public class TransactionService {
         }
 
         transactions.add(new Transaction(request.valor(), request.dataHora()));
+    }
+
+    public void deleteTransaction(){
+        this.transactions.clear();
     }
 }
