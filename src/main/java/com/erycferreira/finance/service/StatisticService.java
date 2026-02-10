@@ -2,6 +2,7 @@ package com.erycferreira.finance.service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -13,14 +14,16 @@ import com.erycferreira.finance.dto.StatisticResponse;
 @Service
 public class StatisticService {
 
+    private final Clock clock;
     private final TransactionService transactionService;
 
-    public StatisticService(TransactionService transactionService) {
+    public StatisticService(TransactionService transactionService, Clock clock) {
         this.transactionService = transactionService;
+        this.clock = clock;
     }
 
     public StatisticResponse buildStatistic() {
-        OffsetDateTime last60seconds = OffsetDateTime.now().minusSeconds(60);
+        OffsetDateTime last60seconds = OffsetDateTime.now(clock).minusSeconds(60);
 
         List<Transaction> transactions = this.transactionService.getTransactions().stream()
                 .filter(t -> t.getDataHora().isAfter(last60seconds)).toList();
