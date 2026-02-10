@@ -1,0 +1,68 @@
+package com.erycferreira.finance.service;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.OffsetDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+
+import com.erycferreira.finance.domain.Transaction;
+import com.erycferreira.finance.dto.StatisticResponse;
+
+@Service
+public class StatisticService {
+
+    private final TransactionService transactionService;
+
+    public StatisticService(TransactionService transactionService) {
+        this.transactionService = transactionService;
+    }
+
+    public StatisticResponse buildStatistic() {
+        OffsetDateTime last60seconds = OffsetDateTime.now().minusSeconds(60);
+
+        List<Transaction> transactions = this.transactionService.getTransactions().stream()
+                .filter(t -> t.getDataHora().isAfter(last60seconds)).toList();
+
+        long count = transactions.size();
+
+        if (transactions.isEmpty()) {
+            return new StatisticResponse(
+                    count,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO,
+                    BigDecimal.ZERO
+            );
+        }
+
+        BigDecimal sum = transactions.stream()
+                .map(Transaction::getValor)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal min = transactions.stream()
+                .map(Transaction::getValor)
+                .min(BigDecimal::compareTo)
+                .orElse(null);
+
+        BigDecimal max = transactions.stream()
+                .map(Transaction::getValor)
+                .max(BigDecimal::compareTo)
+                .orElse(null);
+
+        BigDecimal avg = sum.divide(
+                BigDecimal.valueOf(count),
+                2,
+                RoundingMode.HALF_UP
+        );
+
+        return new StatisticResponse(
+                count,
+                sum,
+                avg,
+                min,
+                max
+        );
+    }
+}

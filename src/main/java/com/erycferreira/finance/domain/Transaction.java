@@ -16,4 +16,12 @@ public class Transaction {
         this.valor = valor;
         this.dataHora = dataHora;
     }
+
+    public BigDecimal getValor() {
+        return this.valor;
+    }
+
+    public OffsetDateTime getDataHora() {
+        return this.dataHora;
+    }
 }

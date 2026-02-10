@@ -1,5 +1,6 @@
 package com.erycferreira.finance.service;
 
+import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -14,10 +15,15 @@ import com.erycferreira.finance.exception.DateTimeOutLimitException;
 @Service
 public class TransactionService {
 
+    private final Clock clock;
     private final List<Transaction> transactions = Collections.synchronizedList(new ArrayList<>());
 
+    public TransactionService(Clock clock) {
+        this.clock = clock;
+    }
+
     public void createTransaction(TransactionRequest request) {
-        OffsetDateTime current = OffsetDateTime.now();
+        OffsetDateTime current = OffsetDateTime.now(clock);
 
         if (request.dataHora().isAfter(current)) {
             throw new DateTimeOutLimitException("Não é permitido transação com horário superior ao do servidor");
@@ -26,7 +32,11 @@ public class TransactionService {
         transactions.add(new Transaction(request.valor(), request.dataHora()));
     }
 
-    public void deleteTransaction(){
+    public void clearTransactions() {
         this.transactions.clear();
+    }
+
+    public List<Transaction> getTransactions() {
+        return List.copyOf(this.transactions);
     }
 }
