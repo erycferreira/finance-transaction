@@ -6,6 +6,8 @@ import java.time.Clock;
 import java.time.OffsetDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.erycferreira.finance.domain.Transaction;
@@ -16,6 +18,8 @@ public class StatisticService {
 
     private final Clock clock;
     private final TransactionService transactionService;
+    private static final Logger log
+            = LoggerFactory.getLogger(StatisticService.class);
 
     public StatisticService(TransactionService transactionService, Clock clock) {
         this.transactionService = transactionService;
@@ -29,6 +33,9 @@ public class StatisticService {
                 .filter(t -> t.getDataHora().isAfter(last60seconds)).toList();
 
         long count = transactions.size();
+
+        log.info("Calculating statistics for last {} seconds", last60seconds);
+        log.debug("Transactions considered for statistics: {}", count);
 
         if (transactions.isEmpty()) {
             return new StatisticResponse(
