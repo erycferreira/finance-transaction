@@ -27,6 +27,7 @@ public class StatisticService {
     }
 
     public StatisticResponse buildStatistic() {
+        long start = System.nanoTime();
         OffsetDateTime last60seconds = OffsetDateTime.now(clock).minusSeconds(60);
 
         List<Transaction> transactions = this.transactionService.getTransactions().stream()
@@ -34,8 +35,7 @@ public class StatisticService {
 
         long count = transactions.size();
 
-        log.info("Calculating statistics for last {} seconds", last60seconds);
-        log.debug("Transactions considered for statistics: {}", count);
+        log.info("Calculating statistics from {}", last60seconds);
 
         if (transactions.isEmpty()) {
             return new StatisticResponse(
@@ -65,6 +65,14 @@ public class StatisticService {
                 BigDecimal.valueOf(count),
                 2,
                 RoundingMode.HALF_UP
+        );
+
+        long durationNs = System.nanoTime() - start;
+        long durationMs = durationNs / 1_000_000;
+
+        log.debug("Transactions considered for statistics: {}, calculated in {}",
+                count,
+                durationMs
         );
 
         return new StatisticResponse(
